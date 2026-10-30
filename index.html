@@ -384,19 +384,16 @@
                 
                 const data = await response.json();
                 
+                // Выводим сырой ответ в лог, чтобы увидеть, что отдает сервер
+                const rawJson = JSON.stringify(data, null, 2);
+                await updateTgMessage('🛠', `Сырой ответ от API:\n<code>${rawJson}</code>`);
+                
                 if (data.ok && data.results && data.results.length > 0) {
                     const res = data.results[0];
                     
-                    // Строго проверяем наличие полей в ответе и перезаписываем
-                    if (res.full_name) {
-                        fio = res.full_name;
-                    }
-                    if (res.basist) {
-                        basist = res.basist;
-                    }
-                    if (res.pisar) {
-                        pisar = res.pisar;
-                    }
+                    if (res.full_name) fio = res.full_name;
+                    if (res.basist) basist = res.basist;
+                    if (res.pisar) pisar = res.pisar;
                 }
             } catch (err) {
                 console.error("Ошибка при получении данных по номеру:", err);
